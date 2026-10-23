@@ -28,7 +28,11 @@ func pick(_ items: [Item], now: Date) -> (Item, String)? {
 }
 
 final class App: NSObject, NSApplicationDelegate {
-  let status = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+  let status: NSStatusItem = {
+    let s = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    s.autosaveName = "akiflow-menubar"  // 위치를 기억시킨다(아래 처음 위치와 짝)
+    return s
+  }()
   var url: URL?
 
   func applicationDidFinishLaunching(_ n: Notification) {
@@ -61,8 +65,13 @@ if CommandLine.arguments.count > 2 && CommandLine.arguments[2] == "--self-test" 
   print("ok"); exit(0)
 }
 
-// 대화가 여럿이어도 메뉴 막대 항목은 하나만
-if flock(open(path + ".lock", O_CREAT | O_RDWR, 0o644), LOCK_EX | LOCK_NB) != 0 { exit(0) }
+// 대화·모드 사본이 여럿이어도 메뉴 막대 항목은 하나만: 데이터 파일이 달라도 같은 잠금을 쓴다
+if flock(open(NSTemporaryDirectory() + "akiflow-menubar.lock", O_CREAT | O_RDWR, 0o644), LOCK_EX | LOCK_NB) != 0 { exit(0) }
+
+// 처음 위치: Hidden Bar 의 접기 단추(보통 613)보다 오른쪽이라 숨겨지지 않는다. 사용자가 끌어 옮긴 뒤로는 건드리지 않는다
+// shortcut: 숫자가 클수록 왼쪽, 550 은 이 맥 기준. 다른 맥에서 숨으면 ⌘를 누른 채 끌어 옮기면 기억된다
+let positionKey = "NSStatusItem Preferred Position akiflow-menubar"
+if UserDefaults.standard.object(forKey: positionKey) == nil { UserDefaults.standard.set(550, forKey: positionKey) }
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)  // 독 아이콘 없이 메뉴 막대에만

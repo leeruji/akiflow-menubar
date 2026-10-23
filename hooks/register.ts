@@ -44,10 +44,12 @@ export const register: Register = (on) => {
     // 대화가 끝나거나 모드가 다시 불리면 표시기도 같이 꺼진다
     const bin = `${$.plugin.root}/native/menubar`
     void (async () => {
-      // 표시기는 처음 한 번 이 맥에서 빌드한다(실행 파일은 저장소에 넣지 않음)
-      await $.fs.stat(bin).catch(() =>
-        $.process.run(['swiftc', '-O', `${bin}.swift`, '-o', bin], { timeoutMs: 300_000 }),
-      )
+      // 표시기는 이 맥에서 빌드한다(실행 파일은 저장소에 넣지 않음): 처음, 그리고 소스가 바뀌었을 때
+      const built = await $.fs.stat(bin).catch(() => undefined)
+      const source = await $.fs.stat(`${bin}.swift`)
+      if (!built || built.mtimeMs < source.mtimeMs) {
+        await $.process.run(['swiftc', '-O', `${bin}.swift`, '-o', bin], { timeoutMs: 300_000 })
+      }
       for await (const _ of $.process.spawn({ argv: [bin, file] })) {}
     })()
     return started

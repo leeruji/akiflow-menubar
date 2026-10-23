@@ -37,3 +37,4 @@ claude plugin install akiflow-menubar --marketplace leeruji/akiflow-menubar
 - Claude Code 세션이 열려 있는 동안만 보입니다. 세션을 여러 개 열어도 표시기는 하나만 뜹니다.
 - 받아 오기에 실패하면 모드 폴더의 `error.txt` 에 이유를 남기고, 다음에 성공하면 비웁니다. 비어 있으면 정상입니다.
 - 길이를 정하지 않은 할 일은 30분짜리로 셉니다.
+- Hidden Bar 같은 메뉴 막대 정리 앱에 가려지지 않도록, 처음에는 오른쪽 끝 쪽(기본 위치 550)에 놓습니다. 그래도 가려지면 ⌘ 를 누른 채 항목을 접기 단추 오른쪽으로 끌어다 놓으세요. 한 번 옮기면 기억합니다.
