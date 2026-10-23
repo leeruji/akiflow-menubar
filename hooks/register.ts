@@ -5,6 +5,7 @@ export const register: Register = (on) => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
     const file = `${$.plugin.root}/schedule.json`
+    const errorFile = `${$.plugin.root}/error.txt`
 
     const refresh = async () => {
       const now = await $.clock.now()
@@ -31,9 +32,10 @@ export const register: Register = (on) => {
             .map((v) => ({ title: v.title, start: v.start, minutes: v.duration ?? 0, url: v.url })),
         ]
         await $.fs.write(file, JSON.stringify(items))
+        await $.fs.write(errorFile, '') // 비어 있으면 마지막 받아 오기가 성공한 것
       } catch (err) {
         // 디버그 기록은 데스크톱 앱에서 찾기 어려워 모드 폴더에 남긴다
-        await $.fs.write(`${$.plugin.root}/error.txt`, `${new Date(await $.clock.now()).toISOString()} ${err}\n`)
+        await $.fs.write(errorFile, `${new Date(await $.clock.now()).toISOString()} ${err}\n`)
       }
     }
 

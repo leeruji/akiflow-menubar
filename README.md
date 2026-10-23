@@ -35,5 +35,5 @@ claude plugin install akiflow-menubar --marketplace leeruji/akiflow-menubar
 - 모드가 2분마다 Akiflow 에서 어제부터 모레까지의 일정을 받아 `schedule.json` 에 둡니다.
 - 메뉴 막대 표시기(`native/menubar.swift`)가 15초마다 그 파일을 읽어 남은 시간을 다시 계산합니다.
 - Claude Code 세션이 열려 있는 동안만 보입니다. 세션을 여러 개 열어도 표시기는 하나만 뜹니다.
-- 받아 오기에 실패하면 모드 폴더의 `error.txt` 에 이유를 남깁니다.
+- 받아 오기에 실패하면 모드 폴더의 `error.txt` 에 이유를 남기고, 다음에 성공하면 비웁니다. 비어 있으면 정상입니다.
 - 길이를 정하지 않은 할 일은 30분짜리로 셉니다.
