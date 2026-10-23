@@ -1,0 +1,5 @@
+{
+  "name": "akiflow-menubar",
+  "owner": { "name": "leeruji" },
+  "plugins": [{ "name": "akiflow-menubar", "source": "./" }]
+}
