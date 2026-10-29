@@ -12,16 +12,25 @@ export const register: Register = (on) => {
       // 어제~모레를 넉넉히 받는다: 모드 안의 시간대를 몰라도 오늘이 빠지지 않게
       const day = (d: number) => new Date(now + d * 864e5).toISOString().slice(0, 10)
       try {
-        const r = await $.mcp.call('akiflow', 'get_schedule', {
-          start_date: day(-1),
-          end_date: day(2),
-          entities: 'all',
-          filters: { exclude_all_day: true },
-        })
-        const block = r.content.find((c) => c.type === 'text')
-        const text = block?.type === 'text' ? block.text ?? '' : ''
-        if (r.isError || !text) throw new Error(text || 'no text')
-        const { tasks = [], events = [] } = JSON.parse(text) as { tasks?: any[]; events?: any[] }
+        // 하루씩 받는다: 나흘 치를 한 번에 받으면 MCP 결과 크기 한도를 넘어 JSON 대신 "Error: result … exceeds" 글이 온다
+        // shortcut: 하루 일정만으로도 한도를 넘으면 다시 깨진다, 그때는 entities 를 tasks·events 로 더 나눌 것
+        const days = await Promise.all(
+          [-1, 0, 1, 2].map(async (d) => {
+            const r = await $.mcp.call('akiflow', 'get_schedule', {
+              start_date: day(d),
+              end_date: day(d),
+              entities: 'all',
+              filters: { exclude_all_day: true },
+            })
+            const block = r.content.find((c) => c.type === 'text')
+            const text = block?.type === 'text' ? block.text ?? '' : ''
+            if (r.isError || !text.startsWith('{')) throw new Error(text.slice(0, 200) || 'no text')
+            return JSON.parse(text) as { tasks?: any[]; events?: any[] }
+          }),
+        )
+        const tasks = days.flatMap((x) => x.tasks ?? [])
+        // 자정을 넘는 일정은 이틀에 다 나오므로 하나만 남긴다
+        const events = [...new Map(days.flatMap((x) => x.events ?? []).map((v) => [v.id, v])).values()]
         const items = [
           ...tasks
             .filter((t) => t.datetime && !t.done)
